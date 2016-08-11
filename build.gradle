@@ -1,0 +1,52 @@
+
+
+
+
+task lesConstantes {
+	ext.dossierEntree = "injection";
+	ext.resultat = "resultat";
+	ext.listFichierPivot = new ArrayList<File>();
+}
+
+task creationDossier << {
+	println("suppression/creation du dossier destination : ${lesConstantes.resultat} ");
+	ant.delete(dir: lesConstantes.resultat );
+	ant.mkdir(dir: lesConstantes.resultat );
+
+	println("recherche des fichiers pivots : ")
+	ant.fileScanner {
+		fileset(dir: lesConstantes.dossierEntree)
+	}.each {
+		if(it ==~ ".*_PVT.xml" ) {
+			println "\t" + it.getName();
+			lesConstantes.listFichierPivot.add(it);
+		}
+	}
+}
+
+task cc ( dependsOn: creationDossier) << {
+	println("copie des "+lesConstantes.listFichierPivot.size()+" fichiers pivots : ");
+	
+	lesConstantes.listFichierPivot.each {
+		def pb = it.getParent();
+		def nom = it.getName();
+		def pt = pb - "binaire" +"technique";
+
+		// copie des fichiers binaires.		
+		def nom1 = nom - "_PVT.xml" + "_*";
+		ant.copy(todir: lesConstantes.resultat + "/" + nom - "_PVT.xml" + "/binaire" ) {
+			fileset( dir: pb , includes: nom1 , excludes:'' );
+		}
+		// copie des fichiers techniques.
+		ant.copy(todir: lesConstantes.resultat + "/" + nom - "_PVT.xml" + "/technique" ) {
+			fileset( dir: pt , includes: nom1 , excludes:'' );
+		}
+	}
+}
+
+
+task salut {
+	println("tache salut");
+}
+
+

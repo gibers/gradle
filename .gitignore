@@ -1,0 +1,7 @@
+/target/
+.settings
+.classpath
+.git
+.project
+.gradle
+deployerWar.bat
